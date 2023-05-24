@@ -50,6 +50,12 @@ uint8_t RxBuffer[20];
 uint8_t TxBuffer[40];
 int8_t num;
 uint8_t casee;
+int16_t result = 0;
+int16_t num1 = 0;
+int16_t num2 = 0;
+uint16_t dgit = 0;
+uint8_t op;
+uint8_t state;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -247,43 +253,508 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void UARTInterruptConfig()
+{
+	HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
+
+}
 void UARTPollingMethod(){
 	HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
-}
-void UARTInterruptConfig() {
-	HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
-}
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-	if (huart == &huart2)
-	{
-		num = RxBuffer[0] ;
-		if(num = 49){
-			RxBuffer[2] = '\0';
 			num = RxBuffer[0] ;
-			if(num!=50 && num!=49){
-				if (num < 91 ){
-					num = ((RxBuffer[0]- 65 + 3) % 26)+65;}
-				else{
-					num = ((RxBuffer[0]- 97 + 3) % 26)+97;}}
-			sprintf((char*)TxBuffer, &num ,RxBuffer);
-			HAL_UART_Transmit_IT(&huart2, TxBuffer, strlen((char*)TxBuffer));
-			HAL_UART_Receive_IT(&huart2, RxBuffer, 1);}
-		if(num = 50){
-			RxBuffer[2] = '\0';
-			num = RxBuffer[0] ;
-			if(num!=50 && num!=49){
-				if (num < 91 ){
-					num = ((RxBuffer[0]- 65 - 3 + 26) % 26)+65;}
-				else{
-					num = ((RxBuffer[0]- 97 - 3 + 26) % 26)+97;}}
-			sprintf((char*)TxBuffer, &num ,RxBuffer);
-			HAL_UART_Transmit_IT(&huart2, TxBuffer, strlen((char*)TxBuffer));
-			HAL_UART_Receive_IT(&huart2, RxBuffer, 1);}
-
-
-	}
+			if( num == 49){num1 = 1;}
+			else if (num == 50){dgit = 2;}
+			else if (num == 51){dgit = 3;}
+			else if (num == 52){dgit = 4;}
+			else if (num == 53){dgit = 5;}
+			else if (num == 54){dgit = 6;}
+			else if (num == 55){dgit = 7;}
+			else if (num == 56){dgit = 8;}
+			else if (num == 57){dgit = 9;}
+			else if (num == 43){dgit = '+';}//+
+			else if (num == 45){dgit = '-';}//-
+			else if (num == 42){dgit = '*';}//*
+			else if (num == 47){dgit = '/';}// /
+			else if (num == 61){dgit = '=';}
+			switch (state){
+			default:
+			case 0:
+				num = RxBuffer[0] ;
+			if(-1 < dgit && dgit < 10){
+				 if(dgit == '0'){
+					num1 = 0;
+				 }else if(dgit == '1'){
+					 num1 = 1;
+				 }else if(dgit == '2'){
+					 num1 = 2;
+				 }else if(dgit == '3'){
+					 num1 = 3;
+				 }else if(dgit == '4'){
+					 num1 = 4;
+				 }else if(dgit == '5'){
+					 num1 = 5;
+				 }else if(dgit == '6'){
+					 num1 = 6;
+				 }else if(dgit == '7'){
+					 num1 = 7;
+				 }else if(dgit == '8'){
+					 num1 = 8;
+				 }else if(dgit == '9'){
+					 num1 = 9;
+				 }
+				 state = 0;}
+				 else if (dgit == '+' || dgit == '-' || dgit == '*' || dgit == '/' ){
+					 if(dgit == '+'){
+						 op = '+';
+					 }else if(dgit == '-'){
+						 op = '-';
+					 }else if(dgit == '*'){
+						 op = '*';
+					 }else if(dgit == '/'){
+						 op = '/';
+					 }
+					 state = 1;
+				 	 }
+				break;
+			case 1:
+				num = RxBuffer[0] ;
+				if (dgit == '+' || dgit == '-' || dgit== '*' || dgit == '/' ){
+					 if(dgit == '+'){
+						 op = '+';
+					 }else if(dgit == '-'){
+						 op = '-';
+					 }else if(dgit == '*'){
+						 op = '*';
+					 }else if(dgit == '/'){
+						 op = '/';
+					 }
+					 state = 1;
+				}else if(-1 < dgit && dgit < 10){
+					 if(dgit == '0'){
+						 num2 = 0;
+					 }else if(dgit == '1'){
+						 num2 = 1;
+					 }else if(dgit == '2'){
+						 num2 = 2;
+					 }else if(dgit== '3'){
+						 num2 = 3;
+					 }else if(dgit == '4'){
+						 num2 = 4;
+					 }else if(dgit == '5'){
+						 num2 = 5;
+					 }else if(dgit == '6'){
+						 num2 = 6;
+					 }else if(dgit == '7'){
+						 num2 = 7;
+					 }else if(dgit == '8'){
+						 num2 = 8;
+					 }else if(dgit == '9'){
+						 num2 = 9;
+					 }
+					 state = 2;
+				 }else if (dgit == '+' || dgit == '-' || dgit == '*' || dgit == '/' ){
+					 if(dgit == '+'){
+						 result = num1+num2;
+						 op = '+';
+					 }else if(dgit == '-'){
+						 result = num1 - num2;
+						 op = '-';
+					 }else if(dgit == '*'){
+						 result = num1 * num2;
+						 op = '*';
+					 }else if(dgit == '/'){
+						 result = num1 / num2;
+						 op = '/';
+					 }
+					 num1 = result;
+					 state = 1;
+				break;
+			case 2:
+				num = RxBuffer[0] ;
+								if(-1 < dgit && dgit < 10){
+									 if(dgit == '0'){
+										 num2 = 0;
+									 }else if(dgit == '1'){
+										num2 = 1;
+									 }else if(dgit == '2'){
+										 num2 = 2;
+									 }else if(dgit == '3'){
+										 num2 = 3;
+									 }else if(dgit == '4'){
+										 num2 = 4;
+									 }else if(dgit == '5'){
+										 num2 = 5;
+									 }else if(dgit == '6'){
+										 num2 = 6;
+									 }else if(dgit == '7'){
+										 num2 = 7;
+									 }else if(dgit == '8'){
+										 num2 = 8;
+									 }else if(dgit == '9'){
+										 num2 = 9;
+									 }
+									 state = 2;
+								}else if (dgit == '+' || dgit == '-' || dgit == '*' || dgit == '/' ){
+									if(dgit == '+'){
+										result = num1+num2;
+										op = '+';
+									}else if(dgit == '-'){
+										result = num1 - num2;
+										op = '-';
+									}else if(dgit == '*'){
+										result = num1 * num2;
+										op = '*';
+									}else if(dgit == '/'){
+										result = num1 / num2;
+										op = '/';
+													 }
+									 num1 = result;
+									 state = 1;
+								}
+								else if(dgit == '='){
+									if(op == '+'){
+										result = num1 + num2;
+									}else if(op == '-'){
+										result = num1 - num2;
+									}else if(op == '*'){
+										result = num1 * num2;
+									}else if(op == '/'){
+										result = num1 / num2;
+									}
+									num1 = result;
+									state = 3;
+								}
+								break;
+			case 3:
+				num = RxBuffer[0] ;
+				if(-1 < dgit && dgit < 10){
+										 if(dgit == '0'){
+											num1 = 0;
+										 }else if(dgit == '1'){
+											 num1 = 1;
+										 }else if(dgit == '2'){
+											 num1 = 2;
+										 }else if(dgit == '3'){
+											 num1 = 3;
+										 }else if(dgit == '4'){
+											 num1 = 4;
+										 }else if(dgit == '5'){
+											 num1 = 5;
+										 }else if(dgit == '6'){
+											 num1 = 6;
+										 }else if(dgit == '7'){
+											 num1 = 7;
+										 }else if(dgit == '8'){
+											 num1 = 8;
+										 }else if(dgit == '9'){
+											num1 = 9;
+										 }
+										 state = 0;
+									 }
+									else if(dgit == '='){
+										if (num1 == 1 && num2 == 0 && op == '/'){
+											result = 0;
+										}
+										else if(op == '+'){
+											result = num1 + num2;
+										}else if(op == '-'){
+											result = num1 - num2;
+										}else if(op == '*'){
+											result = num1 * num2;
+										}else if(op == '/'){
+											result = num1 / num2;
+										}
+										num1 = result;
+										state = 3;
+									}
+									else if (dgit == '+' || dgit == '-' || dgit == '*' || dgit == '/' ){
+										 if(dgit == '+'){
+											 op = '+';
+										 }else if(dgit == '-'){
+											 op = '-';
+										 }else if(dgit == '*'){
+											 op = '*';
+										 }else if(dgit == '/'){
+											 op = '/';
+										 }
+										 state = 1;
+									}
+									break;
+				 }
+				sprintf((char*)TxBuffer, &result, RxBuffer);
+					  	//HAL_UART_Transmit_IT(&huart2, TxBuffer, strlen((char*)TxBuffer));
+					  	HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
+			}
 }
+
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef*huart)
+//{
+//	if(huart == &huart2)
+//	{
+//		num = RxBuffer[0] ;
+//		if( num == 49){num1 = 1;}
+//		else if (num == 50){dgit = 2;}
+//		else if (num == 51){dgit = 3;}
+//		else if (num == 52){dgit = 4;}
+//		else if (num == 53){dgit = 5;}
+//		else if (num == 54){dgit = 6;}
+//		else if (num == 55){dgit = 7;}
+//		else if (num == 56){dgit = 8;}
+//		else if (num == 57){dgit = 9;}
+//		else if (num == 43){dgit = '+';}//+
+//		else if (num == 45){dgit = '-';}//-
+//		else if (num == 42){dgit = '*';}//*
+//		else if (num == 47){dgit = '/';}// /
+//		else if (num == 61){dgit = '=';}
+//		switch (state){
+//		default:
+//		case 0:
+//			num = RxBuffer[0] ;
+//		if(-1 < dgit && dgit < 10){
+//			 if(dgit == '0'){
+//				num1 = 0;
+//			 }else if(dgit == '1'){
+//				 num1 = 1;
+//			 }else if(dgit == '2'){
+//				 num1 = 2;
+//			 }else if(dgit == '3'){
+//				 num1 = 3;
+//			 }else if(dgit == '4'){
+//				 num1 = 4;
+//			 }else if(dgit == '5'){
+//				 num1 = 5;
+//			 }else if(dgit == '6'){
+//				 num1 = 6;
+//			 }else if(dgit == '7'){
+//				 num1 = 7;
+//			 }else if(dgit == '8'){
+//				 num1 = 8;
+//			 }else if(dgit == '9'){
+//				 num1 = 9;
+//			 }
+//			 state = 0;}
+//			 else if (dgit == '+' || dgit == '-' || dgit == '*' || dgit == '/' ){
+//				 if(dgit == '+'){
+//					 op = '+';
+//				 }else if(dgit == '-'){
+//					 op = '-';
+//				 }else if(dgit == '*'){
+//					 op = '*';
+//				 }else if(dgit == '/'){
+//					 op = '/';
+//				 }
+//				 state = 1;
+//			 	 }
+//			break;
+//		case 1:
+//			num = RxBuffer[0] ;
+//			if (dgit == '+' || dgit == '-' || dgit== '*' || dgit == '/' ){
+//				 if(dgit == '+'){
+//					 op = '+';
+//				 }else if(dgit == '-'){
+//					 op = '-';
+//				 }else if(dgit == '*'){
+//					 op = '*';
+//				 }else if(dgit == '/'){
+//					 op = '/';
+//				 }
+//				 state = 1;
+//			}else if(-1 < dgit && dgit < 10){
+//				 if(dgit == '0'){
+//					 num2 = 0;
+//				 }else if(dgit == '1'){
+//					 num2 = 1;
+//				 }else if(dgit == '2'){
+//					 num2 = 2;
+//				 }else if(dgit== '3'){
+//					 num2 = 3;
+//				 }else if(dgit == '4'){
+//					 num2 = 4;
+//				 }else if(dgit == '5'){
+//					 num2 = 5;
+//				 }else if(dgit == '6'){
+//					 num2 = 6;
+//				 }else if(dgit == '7'){
+//					 num2 = 7;
+//				 }else if(dgit == '8'){
+//					 num2 = 8;
+//				 }else if(dgit == '9'){
+//					 num2 = 9;
+//				 }
+//				 state = 2;
+//			 }else if (dgit == '+' || dgit == '-' || dgit == '*' || dgit == '/' ){
+//				 if(dgit == '+'){
+//					 result = num1+num2;
+//					 op = '+';
+//				 }else if(dgit == '-'){
+//					 result = num1 - num2;
+//					 op = '-';
+//				 }else if(dgit == '*'){
+//					 result = num1 * num2;
+//					 op = '*';
+//				 }else if(dgit == '/'){
+//					 result = num1 / num2;
+//					 op = '/';
+//				 }
+//				 num1 = result;
+//				 state = 1;
+//			break;
+//		case 2:
+//			num = RxBuffer[0] ;
+//							if(-1 < dgit && dgit < 10){
+//								 if(dgit == '0'){
+//									 num2 = 0;
+//								 }else if(dgit == '1'){
+//									num2 = 1;
+//								 }else if(dgit == '2'){
+//									 num2 = 2;
+//								 }else if(dgit == '3'){
+//									 num2 = 3;
+//								 }else if(dgit == '4'){
+//									 num2 = 4;
+//								 }else if(dgit == '5'){
+//									 num2 = 5;
+//								 }else if(dgit == '6'){
+//									 num2 = 6;
+//								 }else if(dgit == '7'){
+//									 num2 = 7;
+//								 }else if(dgit == '8'){
+//									 num2 = 8;
+//								 }else if(dgit == '9'){
+//									 num2 = 9;
+//								 }
+//								 state = 2;
+//							}else if (dgit == '+' || dgit == '-' || dgit == '*' || dgit == '/' ){
+//								if(dgit == '+'){
+//									result = num1+num2;
+//									op = '+';
+//								}else if(dgit == '-'){
+//									result = num1 - num2;
+//									op = '-';
+//								}else if(dgit == '*'){
+//									result = num1 * num2;
+//									op = '*';
+//								}else if(dgit == '/'){
+//									result = num1 / num2;
+//									op = '/';
+//												 }
+//								 num1 = result;
+//								 state = 1;
+//							}
+//							else if(dgit == '='){
+//								if(op == '+'){
+//									result = num1 + num2;
+//								}else if(op == '-'){
+//									result = num1 - num2;
+//								}else if(op == '*'){
+//									result = num1 * num2;
+//								}else if(op == '/'){
+//									result = num1 / num2;
+//								}
+//								num1 = result;
+//								state = 3;
+//							}
+//							break;
+//		case 3:
+//			num = RxBuffer[0] ;
+//			if(-1 < dgit && dgit < 10){
+//									 if(dgit == '0'){
+//										num1 = 0;
+//									 }else if(dgit == '1'){
+//										 num1 = 1;
+//									 }else if(dgit == '2'){
+//										 num1 = 2;
+//									 }else if(dgit == '3'){
+//										 num1 = 3;
+//									 }else if(dgit == '4'){
+//										 num1 = 4;
+//									 }else if(dgit == '5'){
+//										 num1 = 5;
+//									 }else if(dgit == '6'){
+//										 num1 = 6;
+//									 }else if(dgit == '7'){
+//										 num1 = 7;
+//									 }else if(dgit == '8'){
+//										 num1 = 8;
+//									 }else if(dgit == '9'){
+//										num1 = 9;
+//									 }
+//									 state = 0;
+//								 }
+//								else if(dgit == '='){
+//									if (num1 == 1 && num2 == 0 && op == '/'){
+//										result = 0;
+//									}
+//									else if(op == '+'){
+//										result = num1 + num2;
+//									}else if(op == '-'){
+//										result = num1 - num2;
+//									}else if(op == '*'){
+//										result = num1 * num2;
+//									}else if(op == '/'){
+//										result = num1 / num2;
+//									}
+//									num1 = result;
+//									state = 3;
+//								}
+//								else if (dgit == '+' || dgit == '-' || dgit == '*' || dgit == '/' ){
+//									 if(dgit == '+'){
+//										 op = '+';
+//									 }else if(dgit == '-'){
+//										 op = '-';
+//									 }else if(dgit == '*'){
+//										 op = '*';
+//									 }else if(dgit == '/'){
+//										 op = '/';
+//									 }
+//									 state = 1;
+//								}
+//								break;
+//
+//
+//		}
+//		RxBuffer[0] = '\0';
+//	  	sprintf((char*)TxBuffer, &result, RxBuffer);
+//	  	//HAL_UART_Transmit_IT(&huart2, TxBuffer, strlen((char*)TxBuffer));
+//	  	HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
+//
+//
+//	}
+//}
+//}
+//void UARTInterruptConfig() {
+//	HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
+//}
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+//{
+//	if (huart == &huart2)
+//	{
+//		num = RxBuffer[0] ;
+//		if(num = 49){
+//			RxBuffer[2] = '\0';
+//			num = RxBuffer[0] ;
+//			if(num!=50 && num!=49){
+//				if (num < 91 ){
+//					num = ((RxBuffer[0]- 65 + 3) % 26)+65;}
+//				else{
+//					num = ((RxBuffer[0]- 97 + 3) % 26)+97;}}
+//			sprintf((char*)TxBuffer, &num ,RxBuffer);
+//			HAL_UART_Transmit_IT(&huart2, TxBuffer, strlen((char*)TxBuffer));
+//			HAL_UART_Receive_IT(&huart2, RxBuffer, 1);}
+//		if(num = 50){
+//			RxBuffer[2] = '\0';
+//			num = RxBuffer[0] ;
+//			if(num!=50 && num!=49){
+//				if (num < 91 ){
+//					num = ((RxBuffer[0]- 65 - 3 + 26) % 26)+65;}
+//				else{
+//					num = ((RxBuffer[0]- 97 - 3 + 26) % 26)+97;}}
+//			sprintf((char*)TxBuffer, &num ,RxBuffer);
+//			HAL_UART_Transmit_IT(&huart2, TxBuffer, strlen((char*)TxBuffer));
+//			HAL_UART_Receive_IT(&huart2, RxBuffer, 1);}
+//
+//
+//	}
+//}
 /*void 1ccipher(){
 	//encryption
 	if (RxBuffer[0] == '1'){
