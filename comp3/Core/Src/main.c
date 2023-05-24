@@ -48,7 +48,8 @@ DMA_HandleTypeDef hdma_usart2_tx;
 /* USER CODE BEGIN PV */
 uint8_t RxBuffer[20];
 uint8_t TxBuffer[40];
-uint8_t num;
+int8_t num;
+uint8_t casee;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -78,7 +79,7 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-	HAL_Init();
+  HAL_Init();
 
   /* USER CODE BEGIN Init */
 
@@ -96,7 +97,7 @@ int main(void)
   MX_DMA_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  uint8_t text[] = "jalolee";
+  uint8_t text[] = "jello";
   HAL_UART_Transmit(&huart2, text, 11, 10);
   UARTInterruptConfig();
   /* USER CODE END 2 */
@@ -268,16 +269,28 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	if (huart == &huart2)
 	{
+
+		/*RxBuffer[2] = '\0';
+		num = RxBuffer[0] ;
+		if (num < 91 ){
+			num = ((RxBuffer[0]- 65 + 3) % 26)+65;}
+		else{
+			num = ((RxBuffer[0]- 97 + 3) % 26)+97;}
+		sprintf((char*)TxBuffer, &num ,RxBuffer);
+		HAL_UART_Transmit_IT(&huart2, TxBuffer, strlen((char*)TxBuffer));
+		HAL_UART_Receive_IT(&huart2, RxBuffer, 1);*/
 		RxBuffer[2] = '\0';
-			//(for string only) Add string stop symbol \0 to end string
-			num = RxBuffer[0] + 3;
-			if("Z"> num > "a"){num = num-90+64;}
-			if('z' > num > '~'){num = num-122+96;}
-			//return received char
-			sprintf((char*)TxBuffer, &num,"\r\n" ,RxBuffer);
-			HAL_UART_Transmit_IT(&huart2, TxBuffer, strlen((char*)TxBuffer));
-			HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
-		}
+		num = RxBuffer[0] ;
+		if (num < 91 ){
+			num = ((RxBuffer[0]- 65 - 3 + 26) % 26)+65;}
+		else{
+			num = ((RxBuffer[0]- 97 - 3 + 26) % 26)+97;}
+		sprintf((char*)TxBuffer, &num ,RxBuffer);
+		HAL_UART_Transmit_IT(&huart2, TxBuffer, strlen((char*)TxBuffer));
+		HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
+
+
+	}
 }
 /*void 1ccipher(){
 	//encryption
