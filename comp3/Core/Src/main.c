@@ -248,46 +248,38 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 void UARTPollingMethod(){
-	HAL_StatusTypeDef HAL_status = HAL_UART_Receive(&huart2, RxBuffer,10 ,10000);
-	if(HAL_status == HAL_OK){
-		RxBuffer[10] = '\0';
-		sprintf((char*)TxBuffer,"Recived : %s\r\n",RxBuffer);
-		HAL_UART_Transmit(&huart2,TxBuffer,strlen((char*)TxBuffer),10);
-	}
-	else if(HAL_status == HAL_TIMEOUT){
-		uint32_t lastCharPos = huart2.RxXferSize - huart2.RxXferCount;
-		RxBuffer[lastCharPos] = '\0';
-		sprintf((char*)TxBuffer,"Recived Timeout : %s\r\n",RxBuffer);
-		HAL_UART_Transmit(&huart2,TxBuffer,strlen((char*)TxBuffer),10);
-	}
+	HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
 }
 void UARTInterruptConfig() {
 	HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
 }
-
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	if (huart == &huart2)
 	{
-
-		/*RxBuffer[2] = '\0';
 		num = RxBuffer[0] ;
-		if (num < 91 ){
-			num = ((RxBuffer[0]- 65 + 3) % 26)+65;}
-		else{
-			num = ((RxBuffer[0]- 97 + 3) % 26)+97;}
-		sprintf((char*)TxBuffer, &num ,RxBuffer);
-		HAL_UART_Transmit_IT(&huart2, TxBuffer, strlen((char*)TxBuffer));
-		HAL_UART_Receive_IT(&huart2, RxBuffer, 1);*/
-		RxBuffer[2] = '\0';
-		num = RxBuffer[0] ;
-		if (num < 91 ){
-			num = ((RxBuffer[0]- 65 - 3 + 26) % 26)+65;}
-		else{
-			num = ((RxBuffer[0]- 97 - 3 + 26) % 26)+97;}
-		sprintf((char*)TxBuffer, &num ,RxBuffer);
-		HAL_UART_Transmit_IT(&huart2, TxBuffer, strlen((char*)TxBuffer));
-		HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
+		if(num = 49){
+			RxBuffer[2] = '\0';
+			num = RxBuffer[0] ;
+			if(num!=50 && num!=49){
+				if (num < 91 ){
+					num = ((RxBuffer[0]- 65 + 3) % 26)+65;}
+				else{
+					num = ((RxBuffer[0]- 97 + 3) % 26)+97;}}
+			sprintf((char*)TxBuffer, &num ,RxBuffer);
+			HAL_UART_Transmit_IT(&huart2, TxBuffer, strlen((char*)TxBuffer));
+			HAL_UART_Receive_IT(&huart2, RxBuffer, 1);}
+		if(num = 50){
+			RxBuffer[2] = '\0';
+			num = RxBuffer[0] ;
+			if(num!=50 && num!=49){
+				if (num < 91 ){
+					num = ((RxBuffer[0]- 65 - 3 + 26) % 26)+65;}
+				else{
+					num = ((RxBuffer[0]- 97 - 3 + 26) % 26)+97;}}
+			sprintf((char*)TxBuffer, &num ,RxBuffer);
+			HAL_UART_Transmit_IT(&huart2, TxBuffer, strlen((char*)TxBuffer));
+			HAL_UART_Receive_IT(&huart2, RxBuffer, 1);}
 
 
 	}
