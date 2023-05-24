@@ -44,7 +44,8 @@
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
+uint8_t RxBuffer[20];
+uint8_t TxBuffer[40];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -52,7 +53,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
-
+void UARTPollingMethod();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -90,7 +91,7 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  uint8_t text[] = "jallee";
+  uint8_t text[] = "jalolee";
   HAL_UART_Transmit(&huart2, text, 11, 10);
 
   /* USER CODE END 2 */
@@ -102,10 +103,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  static uint64_t timestamp = 0;
-
-	 	  if (HAL_GetTick() > timestamp)
-	 	  {}
+	  UARTPollingMethod();
   }
   /* USER CODE END 3 */
 }
@@ -223,7 +221,20 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void UARTPollingMethod(){
+	HAL_StatusTypeDef HAL_status = HAL_UART_Receive(&huart2, RxBuffer,10 ,10000);
+	if(HAL_status == HAL_OK){
+		RxBuffer[10] = '\0';
+		sprintf((char*)TxBuffer,"Recived : %s\r\n",RxBuffer);
+		HAL_UART_Transmit(&huart2,TxBuffer,strlen((char*)TxBuffer),10);
+	}
+	else if(HAL_status == HAL_TIMEOUT){
+		uint32_t lastCharPos = huart2.RxXferSize - huart2.RxXferCount;
+		RxBuffer[lastCharPos] = '\0';
+		sprintf((char*)TxBuffer,"Recived Timeout : %s\r\n",RxBuffer);
+		HAL_UART_Transmit(&huart2,TxBuffer,strlen((char*)TxBuffer),10);
+	}
+}
 /* USER CODE END 4 */
 
 /**
