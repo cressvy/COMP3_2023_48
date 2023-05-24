@@ -42,15 +42,19 @@
 
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef huart2;
+DMA_HandleTypeDef hdma_usart2_rx;
+DMA_HandleTypeDef hdma_usart2_tx;
 
 /* USER CODE BEGIN PV */
 uint8_t RxBuffer[20];
 uint8_t TxBuffer[40];
+uint8_t num;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
 void UARTPollingMethod();
@@ -74,7 +78,7 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+	HAL_Init();
 
   /* USER CODE BEGIN Init */
 
@@ -89,11 +93,12 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   uint8_t text[] = "jalolee";
   HAL_UART_Transmit(&huart2, text, 11, 10);
-
+  UARTInterruptConfig();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -104,6 +109,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 	  UARTPollingMethod();
+
   }
   /* USER CODE END 3 */
 }
@@ -188,6 +194,25 @@ static void MX_USART2_UART_Init(void)
 }
 
 /**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Stream5_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
+  /* DMA1_Stream6_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -235,6 +260,32 @@ void UARTPollingMethod(){
 		HAL_UART_Transmit(&huart2,TxBuffer,strlen((char*)TxBuffer),10);
 	}
 }
+void UARTInterruptConfig() {
+	HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	if (huart == &huart2)
+	{
+		RxBuffer[2] = '\0';
+			//(for string only) Add string stop symbol \0 to end string
+			num = RxBuffer[0] + 3;
+			if("Z"> num > "a"){num = num-90+64;}
+			if('z' > num > '~'){num = num-122+96;}
+			//return received char
+			sprintf((char*)TxBuffer, &num,"\r\n" ,RxBuffer);
+			HAL_UART_Transmit_IT(&huart2, TxBuffer, strlen((char*)TxBuffer));
+			HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
+		}
+}
+/*void 1ccipher(){
+	//encryption
+	if (RxBuffer[0] == '1'){
+
+	}
+
+} */
 /* USER CODE END 4 */
 
 /**
