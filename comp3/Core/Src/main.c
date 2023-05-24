@@ -256,10 +256,25 @@ void UARTInterruptConfig()
 	HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
 
 }
-void oper()
-  {
-  	switch(op[0])
-  	{
+void col(){//cant pull input in function
+
+		  if(RxBuffer[0] == 43){op[0] = '+' ;}
+		  else if (RxBuffer[0] == 45){op[0] = '-' ;}
+		  else if (RxBuffer[0] == 42){op[0] = '*' ;}
+		  else if (RxBuffer[0] == 47){op[0] = '/' ;}
+		  else if (RxBuffer[0] == 49){dgit = 1 ;}
+		  else if (RxBuffer[0] == 50){dgit = 2 ;}
+		  else if (RxBuffer[0] == 51){dgit = 3 ;}
+		  else if (RxBuffer[0] == 52){dgit = 4 ;}
+		  else if (RxBuffer[0] == 53){dgit = 5 ;}
+		  else if (RxBuffer[0] == 54){dgit = 6 ;}
+		  else if (RxBuffer[0] == 55){dgit = 7 ;}
+		  else if (RxBuffer[0] == 56){dgit = 8 ;}
+		  else if (RxBuffer[0] == 57){dgit = 9 ;}
+
+}
+void oper(){
+  	switch(op[0]){
   		case '+':
   			res = fnum + snum;
   			break;
@@ -275,92 +290,75 @@ void oper()
   			break;
   	}
   }
-void col(){//cant pull input in function
-
-		  if(RxBuffer[0] == 43){op[0] = '+' ;}
-		  else if (RxBuffer[0] == 45){op[0]= '-' ;}
-		  else if (RxBuffer[0] == 42){op[0] = '*' ;}
-		  else if (RxBuffer[0] == 47){op[0] = '/' ;}
-		  else if (RxBuffer[0] == 49){dgit = 1 ;}
-		  else if (RxBuffer[0] == 50){dgit = 2 ;}
-		  else if (RxBuffer[0] == 51){dgit = 3 ;}
-		  else if (RxBuffer[0] == 52){dgit = 4 ;}
-		  else if (RxBuffer[0] == 53){dgit = 5 ;}
-		  else if (RxBuffer[0] == 54){dgit = 6 ;}
-		  else if (RxBuffer[0] == 55){dgit = 7 ;}
-		  else if (RxBuffer[0] == 56){dgit = 8 ;}
-		  else if (RxBuffer[0] == 57){dgit = 9 ;}
-
-}
-
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef*huart)
-{
-	if(huart == &huart2){
-		switch (state){
-			  case 0://should choose number
-					  if ( RxBuffer[0] != '+' && RxBuffer[0] != '-' && RxBuffer[0] != '*'&& RxBuffer[0] != '/' ){col() ;fnum = dgit ;state = 1;}
-					  else{state = 0;}
-					  break;
-
-			  case 1://should choose operator
-					  if ( RxBuffer[0] == '+' || RxBuffer[0] == '-' || RxBuffer[0] == '*'|| RxBuffer[0] == '/' ){col() ;state = 2;}
-					  else if (RxBuffer[0] != '+' && RxBuffer[0] != '-' && RxBuffer[0] != '*'&& RxBuffer[0] != '/'){col();fnum = dgit ;state = 1;}
-					  break;
-			  case 2://should choose number
-					  if ( RxBuffer[0] != '+' && RxBuffer[0] != '-' && RxBuffer[0] != '*'&& RxBuffer[0] != '/' ){col();snum = dgit ;state = 3;}
-					  else if ( RxBuffer[0] == '+' || RxBuffer[0] == '-' || RxBuffer[0] == '*'|| RxBuffer[0] == '/' ){col();state = 2;}
-					  break;
-			  case 3:
-				  	  if ( RxBuffer[0] == 13){oper();fnum = res;}
-				  	  break;
-		}
-  }
-		sprintf((char*)TxBuffer, "Received : %s\r\n", RxBuffer);
-		HAL_UART_Transmit_IT(&huart2, TxBuffer, strlen((char*)TxBuffer));
-		HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
-}
-
-//void UARTInterruptConfig() {
-//	HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
-//}
-//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef*huart)//2
 //{
-//	if (huart == &huart2)
-//	{
-//		num = RxBuffer[0] ;
-//		if(num = 49){
-//			RxBuffer[2] = '\0';
-//			num = RxBuffer[0] ;
-//			if(num!=50 && num!=49){
-//				if (num < 91 ){
-//					num = ((RxBuffer[0]- 65 + 3) % 26)+65;}
-//				else{
-//					num = ((RxBuffer[0]- 97 + 3) % 26)+97;}}
-//			sprintf((char*)TxBuffer, &num ,RxBuffer);
-//			HAL_UART_Transmit_IT(&huart2, TxBuffer, strlen((char*)TxBuffer));
-//			HAL_UART_Receive_IT(&huart2, RxBuffer, 1);}
-//		if(num = 50){
-//			RxBuffer[2] = '\0';
-//			num = RxBuffer[0] ;
-//			if(num!=50 && num!=49){
-//				if (num < 91 ){
-//					num = ((RxBuffer[0]- 65 - 3 + 26) % 26)+65;}
-//				else{
-//					num = ((RxBuffer[0]- 97 - 3 + 26) % 26)+97;}}
-//			sprintf((char*)TxBuffer, &num ,RxBuffer);
-//			HAL_UART_Transmit_IT(&huart2, TxBuffer, strlen((char*)TxBuffer));
-//			HAL_UART_Receive_IT(&huart2, RxBuffer, 1);}
+//	if(huart == &huart2){
+//		switch (state){
+//			  case 0://should choose number
+//					  if ( RxBuffer[0] != '+' && RxBuffer[0] != '-' && RxBuffer[0] != '*'&& RxBuffer[0] != '/' ){col() ;fnum = dgit ;state = 1;}
+//					  else{state = 0;}
+//					  break;
 //
-//
-//	}
+//			  case 1://should choose operator
+//					  if ( RxBuffer[0] == '+' || RxBuffer[0] == '-' || RxBuffer[0] == '*'|| RxBuffer[0] == '/' ){col() ;state = 2;}
+//					  else if (RxBuffer[0] != '+' && RxBuffer[0] != '-' && RxBuffer[0] != '*'&& RxBuffer[0] != '/'){col();fnum = dgit ;state = 1;}
+//					  break;
+//			  case 2://should choose number
+//					  if ( RxBuffer[0] != '+' && RxBuffer[0] != '-' && RxBuffer[0] != '*'&& RxBuffer[0] != '/' ){col();snum = dgit ;state = 3;}
+//					  else if ( RxBuffer[0] == '+' || RxBuffer[0] == '-' || RxBuffer[0] == '*'|| RxBuffer[0] == '/' ){col();state = 2;}
+//					  break;
+//			  case 3:
+//				  	  if ( RxBuffer[0] == 13){oper();fnum = res;}
+//				  	  break;
+//		}
+//  }
+//		sprintf((char*)TxBuffer, "Received : %s\r\n", RxBuffer);
+//		HAL_UART_Transmit_IT(&huart2, TxBuffer, strlen((char*)TxBuffer));
+//		HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
 //}
-/*void 1ccipher(){
-	//encryption
-	if (RxBuffer[0] == '1'){
 
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)//1
+{
+	if (huart == &huart2){
+		switch (state){
+		case 0:
+			num = RxBuffer[0] ;
+			if (num == 49){state = 1;}
+			else if (num == 50){state = 2;}
+			sprintf((char*)TxBuffer, &num ,RxBuffer);
+			HAL_UART_Transmit_IT(&huart2, TxBuffer, strlen((char*)TxBuffer));
+			HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
+			break;
+		case 1:
+			if (num == 50){state = 2;}
+			num = RxBuffer[0] ;
+			RxBuffer[2] = '\0';
+			num = RxBuffer[0] ;
+			if(num!=50 && num!=49){
+				if (num < 91 ){
+					num = ((RxBuffer[0]- 65 + 3) % 26)+65;}
+				else{
+					num = ((RxBuffer[0]- 97 + 3) % 26)+97;}}
+			sprintf((char*)TxBuffer, &num ,RxBuffer);
+			HAL_UART_Transmit_IT(&huart2, TxBuffer, strlen((char*)TxBuffer));
+			HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
+			break;
+		case 2:
+			if (num == 49){state = 1;}
+			RxBuffer[2] = '\0';
+			num = RxBuffer[0] ;
+			if(num!=50 && num!=49){
+				if (num < 91 ){
+					num = ((RxBuffer[0]- 65 - 3 + 26) % 26)+65;}
+				else{
+					num = ((RxBuffer[0]- 97 - 3 + 26) % 26)+97;}}
+			sprintf((char*)TxBuffer, &num ,RxBuffer);
+			HAL_UART_Transmit_IT(&huart2, TxBuffer, strlen((char*)TxBuffer));
+			HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
+			break;
+		}
 	}
-
-} */
+}
 /* USER CODE END 4 */
 
 /**
