@@ -21,6 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "stdio.h"
+#include "string.h"
 
 /* USER CODE END Includes */
 
@@ -88,6 +90,8 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  uint8_t text[] = "jallee";
+  HAL_UART_Transmit(&huart2, text, 11, 10);
 
   /* USER CODE END 2 */
 
@@ -98,6 +102,10 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  static uint64_t timestamp = 0;
+
+	 	  if (HAL_GetTick() > timestamp)
+	 	  {}
   }
   /* USER CODE END 3 */
 }
