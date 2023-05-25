@@ -317,7 +317,7 @@ void oper(){
 //		HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
 //}
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)//1
+void sap(UART_HandleTypeDef *huart)//1
 {
 	if (huart == &huart2){
 		switch (state){
